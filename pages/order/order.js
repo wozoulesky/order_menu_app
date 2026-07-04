@@ -5,10 +5,8 @@ const master = require('../../utils/master.js')
 
 Page({
   data: {
-    // 身份
+    // 身份（登录前置后必有值）
     userInfo: { nickName: '', avatarUrl: '' },
-    tempAvatar: '',
-    tempNick: '',
     isMaster: false,
 
     // 本次菜单
@@ -24,57 +22,21 @@ Page({
       userInfo: login.getUserInfo() || { nickName: '', avatarUrl: '' },
       menu: cart.getMenu()
     })
-    // 已登录则拉取订单
-    if (login.isLoggedIn()) {
-      this.loadOrders()
-    }
-  },
-
-  // ===== 身份填写 =====
-  onChooseAvatar() {
-    // 从相册/拍照选图作为头像（可选，取消不报错）
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['album', 'camera'],
-      success: res => {
-        const avatarUrl = res.tempFiles[0].tempFilePath
-        this.setData({ tempAvatar: avatarUrl })
-      },
-      fail: () => {
-        // 用户取消，不报错
-      }
-    })
-  },
-
-  onNickInput(e) {
-    this.setData({ tempNick: e.detail.value })
-  },
-
-  onSaveProfile() {
-    const nick = (this.data.tempNick || '').trim()
-    if (!nick) {
-      wx.showToast({ title: '请填写昵称', icon: 'none' })
-      return
-    }
-    const info = {
-      nickName: nick,
-      avatarUrl: this.data.tempAvatar || ''
-    }
-    login.saveUserInfo(info)
-    this.setData({ userInfo: info, tempAvatar: '', tempNick: '' })
-    wx.showToast({ title: '已保存', icon: 'success' })
+    // 登录前置后必已登录，直接拉订单
     this.loadOrders()
   },
 
+  // ===== 退出登录 =====
   onLogout() {
-    // 重新填写
-    this.setData({
-      tempNick: this.data.userInfo.nickName || '',
-      tempAvatar: this.data.userInfo.avatarUrl || ''
+    wx.showModal({
+      title: '退出登录',
+      content: '确定退出当前账号？',
+      success: res => {
+        if (res.confirm) {
+          login.logout()
+        }
+      }
     })
-    login.clearUserInfo()
-    this.setData({ userInfo: { nickName: '', avatarUrl: '' }, orders: [], isMaster: false })
   },
 
   // ===== 本次菜单 =====
@@ -87,7 +49,7 @@ Page({
   // ===== 提交订单 =====
   onSubmit() {
     if (!login.isLoggedIn()) {
-      wx.showToast({ title: '请先填写昵称并点保存', icon: 'none' })
+      wx.showToast({ title: '请先登录', icon: 'none' })
       return
     }
     if (this.data.menu.length === 0) {

@@ -51,6 +51,17 @@
   color: var(--color-text-sub);
 }
 
+/* 主人：编辑入口 */
+.edit-entry {
+  margin: 8rpx 32rpx 0;
+  padding: 16rpx 24rpx;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  text-align: center;
+}
+
 /* ===== 通用 section ===== */
 .section {
   margin: 24rpx 32rpx 0;

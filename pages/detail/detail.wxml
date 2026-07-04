@@ -15,6 +15,11 @@
     >{{added ? '已加入菜单' : '加入菜单'}}</view>
   </view>
 
+  <!-- 主人专属：编辑按钮 -->
+  <view wx:if="{{isMaster}}" class="edit-entry" bindtap="onEditTap">
+    ✏️ 编辑这道菜
+  </view>
+
   <!-- 所需食材 -->
   <view class="section">
     <view class="section-title">

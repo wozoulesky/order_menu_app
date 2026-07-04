@@ -1,32 +1,8 @@
 <!--pages/order/order.wxml-->
 <view class="page">
 
-  <!-- 身份栏：填写昵称头像（未填时显示，用于下单识别身份） -->
-  <view class="profile-bar" wx:if="{{!userInfo.nickName}}">
-    <view class="profile-tip">下单前先告诉我你是谁 👇 <text class="profile-tip-sub">（昵称必填，头像可选）</text></view>
-    <view class="profile-form">
-      <!-- 头像选择：可选，点一下从相册选图，不选也行 -->
-      <view class="avatar-pick" bindtap="onChooseAvatar">
-        <image wx:if="{{tempAvatar}}" class="avatar-pick-img" src="{{tempAvatar}}" mode="aspectFill" />
-        <view wx:else class="avatar-pick-placeholder">
-          <text class="avatar-pick-plus">+</text>
-          <text class="avatar-pick-label">头像</text>
-        </view>
-      </view>
-      <!-- 昵称输入：手机端可一键填微信昵称，PC端可手动输入 -->
-      <input
-        class="nickname-input"
-        type="nickname"
-        placeholder="点这里填昵称"
-        value="{{tempNick}}"
-        bindinput="onNickInput"
-        bindblur="onNickInput"
-      />
-      <view class="save-profile-btn" bindtap="onSaveProfile">保存</view>
-    </view>
-  </view>
-
-  <view class="profile-bar profile-bar-done" wx:else>
+  <!-- 身份栏：登录前置后所有人已登录，只显示已登录态 -->
+  <view class="profile-bar">
     <view class="profile-avatar">
       <image wx:if="{{userInfo.avatarUrl}}" class="profile-avatar-img" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
       <view wx:else class="profile-avatar-placeholder">👤</view>
@@ -37,7 +13,7 @@
     </view>
     <!-- 主人专属：添加菜品入口 -->
     <view wx:if="{{isMaster}}" class="add-dish-btn" bindtap="onAddDishTap">➕ 加菜</view>
-    <view class="logout-btn" bindtap="onLogout">改</view>
+    <view class="logout-btn" bindtap="onLogout">退出</view>
   </view>
 
   <!-- ===== 提交订单区 ===== -->

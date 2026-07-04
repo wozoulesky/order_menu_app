@@ -49,9 +49,23 @@ function clearUserInfo() {
   } catch (e) {}
 }
 
+// 退出登录：清身份 + 清主人信息，跳回登录页
+function logout() {
+  clearUserInfo()
+  try {
+    wx.removeStorageSync('my_master_info')
+  } catch (e) {}
+  const app = getApp()
+  if (app && app.globalData) {
+    app.globalData.userInfo = null
+  }
+  wx.reLaunch({ url: '/pages/login/login' })
+}
+
 module.exports = {
   getUserInfo,
   saveUserInfo,
   isLoggedIn,
-  clearUserInfo
+  clearUserInfo,
+  logout
 }

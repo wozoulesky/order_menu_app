@@ -1,0 +1,47 @@
+<!--pages/login/login.wxml-->
+<view class="page">
+  <view class="logo">🍳</view>
+  <view class="title">做饭这件小事</view>
+  <view class="subtitle">记录每一道家常菜的做法</view>
+
+  <view class="form">
+    <!-- 头像预览（选完后显示） -->
+    <view class="avatar-preview" wx:if="{{tempAvatar}}">
+      <image class="avatar-preview-img" src="{{tempAvatar}}" mode="aspectFill" />
+    </view>
+
+    <!-- 昵称预览（选完后显示，可改） -->
+    <input
+      wx:if="{{tempAvatar}}"
+      class="nickname-input"
+      type="nickname"
+      placeholder="确认你的昵称"
+      value="{{tempNick}}"
+      bindinput="onNickInput"
+      bindblur="onNickInput"
+    />
+
+    <!-- 微信一键登录按钮（未选头像时显示） -->
+    <button
+      wx:if="{{!tempAvatar}}"
+      class="wx-login-btn"
+      open-type="chooseAvatar"
+      bindchooseavatar="onChooseWxAvatar"
+    >
+      <text class="wx-login-icon">💬</text>
+      <text>微信一键登录</text>
+    </button>
+
+    <!-- 确认进入按钮（选完头像后显示） -->
+    <view
+      wx:if="{{tempAvatar}}"
+      class="enter-btn {{entering ? 'entering' : ''}}"
+      bindtap="onEnter"
+    >{{entering ? '进入中…' : '进入小程序'}}</view>
+
+    <!-- 从相册选（次要入口） -->
+    <view wx:if="{{!tempAvatar}}" class="album-entry" bindtap="onChooseFromAlbum">
+      用相册图片代替
+    </view>
+  </view>
+</view>

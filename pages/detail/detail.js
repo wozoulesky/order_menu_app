@@ -1,38 +1,51 @@
 // pages/detail/detail.js
 const cart = require('../../utils/cart.js')
+const master = require('../../utils/master.js')
 const app = getApp()
 
 Page({
   data: {
     dish: {},
-    added: false
+    added: false,
+    isMaster: false,
+    dishId: ''
   },
 
   onLoad(options) {
     const id = options.id
-    const dish = this.findDishFromCache(id)
-
-    if (dish) {
-      this.setData({ dish })
-      wx.setNavigationBarTitle({ title: dish.name })
-      this.refreshAdded()
-    } else {
-      // 缓存没有（比如直接进详情页），调云函数取单条
-      this.loadDishFromCloud(id)
-    }
+    this.setData({ dishId: id, isMaster: master.isMaster() })
+    this.loadDish(id)
   },
 
   onShow() {
     this.refreshAdded()
+    // 编辑返回后缓存被清了，重新拉取以显示更新后的内容
+    if (!app.globalData.dishesCache && this.data.dishId) {
+      this.loadDish(this.data.dishId)
+    }
   },
 
-  // 从首页缓存里找菜品
+  // 优先从缓存取，缓存没有则调云函数
+  loadDish(id) {
+    const dish = this.findDishFromCache(id)
+    if (dish) {
+      this.applyDish(dish)
+    } else {
+      this.loadDishFromCloud(id)
+    }
+  },
+
+  applyDish(dish) {
+    this.setData({ dish })
+    wx.setNavigationBarTitle({ title: dish.name })
+    this.refreshAdded()
+  },
+
   findDishFromCache(id) {
     const cache = app.globalData.dishesCache || []
     return cache.find(d => d._id === id)
   },
 
-  // 缓存未命中时，从云函数取单条
   loadDishFromCloud(id) {
     wx.showLoading({ title: '加载中…' })
     wx.cloud.callFunction({
@@ -41,9 +54,7 @@ Page({
       success: res => {
         const dish = res.result && res.result.data
         if (dish) {
-          this.setData({ dish })
-          wx.setNavigationBarTitle({ title: dish.name })
-          this.refreshAdded()
+          this.applyDish(dish)
         } else {
           wx.showToast({ title: '菜品不存在', icon: 'none' })
         }
@@ -57,7 +68,9 @@ Page({
   },
 
   refreshAdded() {
-    this.setData({ added: cart.isInMenu(this.data.dish._id) })
+    if (this.data.dish && this.data.dish._id) {
+      this.setData({ added: cart.isInMenu(this.data.dish._id) })
+    }
   },
 
   onAddTap() {
@@ -70,5 +83,12 @@ Page({
       wx.showToast({ title: '已加入菜单', icon: 'success' })
     }
     this.refreshAdded()
+  },
+
+  // 主人：跳转编辑页
+  onEditTap() {
+    wx.navigateTo({
+      url: '/pages/admin/edit?id=' + this.data.dishId
+    })
   }
 })

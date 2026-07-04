@@ -6,27 +6,75 @@ const CATEGORIES = ['荤菜', '素菜', '汤品', '主食', '饮品']
 Page({
   data: {
     allowed: false,        // 是否有权限进入
+    isEdit: false,         // 编辑模式（true=改菜，false=加菜）
     categories: CATEGORIES,
     categoryIndex: 0,
     form: {
+      _id: '',             // 编辑模式时有值
       name: '',
       ingredients: [{ name: '', amount: '' }],
       seasonings: [{ name: '', amount: '' }],
       steps: ['']
     },
     // 图片
-    imageUrl: '',          // 本地预览路径
+    imageUrl: '',          // 预览路径（编辑模式初始为云存储临时链接）
     imageFileID: '',       // 上传后的云存储 fileID
     saving: false
   },
 
-  onLoad() {
+  onLoad(options) {
     // 前端权限拦截（真正校验在云函数 saveDish）
     if (!master.isMaster()) {
       this.setData({ allowed: false })
       return
     }
     this.setData({ allowed: true })
+
+    // 编辑模式：有 id 参数 = 改菜
+    if (options && options.id) {
+      this.setData({ isEdit: true })
+      wx.setNavigationBarTitle({ title: '编辑菜品' })
+      this.loadDish(options.id)
+    } else {
+      wx.setNavigationBarTitle({ title: '添加菜品' })
+    }
+  },
+
+  // 编辑模式：加载已有菜品数据回填表单
+  loadDish(id) {
+    wx.showLoading({ title: '加载中…' })
+    wx.cloud.callFunction({
+      name: 'getDishes',
+      data: { id },
+      success: res => {
+        const d = res.result && res.result.data
+        if (!d) {
+          wx.showToast({ title: '菜品不存在', icon: 'none' })
+          return
+        }
+        // 回填表单，保证食材/调料/步骤至少一行
+        const ingredients = (d.ingredients && d.ingredients.length) ? d.ingredients : [{ name: '', amount: '' }]
+        const seasonings = (d.seasonings && d.seasonings.length) ? d.seasonings : [{ name: '', amount: '' }]
+        const steps = (d.steps && d.steps.length) ? d.steps : ['']
+        const categoryIndex = Math.max(0, CATEGORIES.indexOf(d.category))
+
+        this.setData({
+          'form._id': d._id,
+          'form.name': d.name || '',
+          'form.ingredients': ingredients,
+          'form.seasonings': seasonings,
+          'form.steps': steps,
+          categoryIndex,
+          imageUrl: d.imageUrl || '',
+          imageFileID: d.imageFileID || ''
+        })
+      },
+      fail: err => {
+        console.error('加载菜品失败', err)
+        wx.showToast({ title: '加载失败', icon: 'none' })
+      },
+      complete: () => wx.hideLoading()
+    })
   },
 
   // ===== 图片选择 + 上传云存储 =====
@@ -153,6 +201,10 @@ Page({
       seasonings,
       steps
     }
+    // 编辑模式带 _id，saveDish 走更新分支
+    if (this.data.isEdit && this.data.form._id) {
+      dish._id = this.data.form._id
+    }
 
     this.setData({ saving: true })
     wx.cloud.callFunction({
@@ -162,7 +214,7 @@ Page({
         const result = res.result || {}
         if (result.ok) {
           wx.showToast({ title: '保存成功', icon: 'success' })
-          // 清空菜品缓存，让首页重新拉取
+          // 清空菜品缓存，让首页/详情页重新拉取
           const app = getApp()
           app.globalData.dishesCache = null
           setTimeout(() => wx.navigateBack(), 800)
