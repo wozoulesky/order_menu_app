@@ -1,0 +1,9 @@
+{
+  "name": "saveDish",
+  "version": "1.0.0",
+  "description": "新增/编辑菜品（仅主人可用）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

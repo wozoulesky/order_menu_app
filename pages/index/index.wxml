@@ -1,0 +1,71 @@
+<!--pages/index/index.wxml-->
+<view class="page">
+  <!-- 顶部标题区 -->
+  <view class="header">
+    <view class="avatar">
+      <!-- 替换真实头像：把图片放到 images/ 目录，改下方 image 即可 -->
+      <image wx:if="{{avatarUrl}}" class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="avatar-placeholder">🍳</view>
+    </view>
+    <view class="header-text">
+      <view class="title">做饭这件小事</view>
+      <view class="subtitle">记录每一道家常菜的做法</view>
+    </view>
+    <!-- 顶部下单入口：明显按钮 -->
+    <view class="order-entry" bindtap="onCartTap">
+      <text class="order-entry-icon">📋</text>
+      <text class="order-entry-text">我的订单</text>
+      <text wx:if="{{menuCount > 0}}" class="order-entry-badge">{{menuCount}}</text>
+    </view>
+  </view>
+
+  <!-- 左侧分类 + 右侧菜品 -->
+  <view class="content">
+    <!-- 左侧分类栏 -->
+    <scroll-view class="category-bar" scroll-y>
+      <view
+        wx:for="{{categories}}"
+        wx:key="*this"
+        class="category-item {{currentCategory === item ? 'active' : ''}}"
+        data-category="{{item}}"
+        bindtap="onCategoryTap"
+      >{{item}}</view>
+    </scroll-view>
+
+    <!-- 右侧菜品列表 -->
+    <scroll-view class="dish-list" scroll-y>
+      <view wx:if="{{loading}}" class="empty">加载中…</view>
+      <block wx:else>
+        <view
+          wx:for="{{dishList}}"
+          wx:key="_id"
+          class="dish-card"
+        >
+          <view class="dish-img" data-id="{{item._id}}" bindtap="onDishTap">
+            <image wx:if="{{item.imageUrl}}" class="dish-img-inner" src="{{item.imageUrl}}" mode="aspectFill" />
+            <view wx:else class="dish-img-placeholder">🥘</view>
+          </view>
+          <view class="dish-info" data-id="{{item._id}}" bindtap="onDishTap">
+            <view class="dish-name ellipsis">{{item.name}}</view>
+          </view>
+          <view
+            class="add-btn {{item.added ? 'added' : ''}}"
+            data-id="{{item._id}}"
+            data-name="{{item.name}}"
+            catchtap="onAddTap"
+          >{{item.added ? '已加入' : '加入菜单'}}</view>
+        </view>
+        <view wx:if="{{dishList.length === 0}}" class="empty">该分类下暂无菜品</view>
+      </block>
+    </scroll-view>
+  </view>
+
+  <!-- 底部浮动按钮：我的菜单 -->
+  <view class="cart-btn {{menuCount === 0 ? 'cart-btn-empty' : ''}}" bindtap="onCartTap">
+    <text class="cart-icon">🍽️</text>
+    <view class="cart-info">
+      <text class="cart-text">{{menuCount > 0 ? '我的菜单(' + menuCount + ')' : '查看我的订单'}}</text>
+      <text wx:if="{{menuCount > 0}}" class="cart-sub">点这里去下单 →</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,73 @@
+<!--pages/admin/edit.wxml-->
+<view class="page" wx:if="{{allowed}}">
+
+  <!-- 菜品图 -->
+  <view class="block">
+    <view class="block-label">菜品图片（可选）</view>
+    <view class="img-picker" bindtap="onChooseImage">
+      <image wx:if="{{imageUrl}}" class="img-preview" src="{{imageUrl}}" mode="aspectFill" />
+      <view wx:else class="img-placeholder">
+        <text class="img-plus">+</text>
+        <text class="img-tip">点此选图</text>
+      </view>
+    </view>
+    <view wx:if="{{imageFileID}}" class="img-uploaded">图片已上传 ✓</view>
+  </view>
+
+  <!-- 菜名 -->
+  <view class="block">
+    <view class="block-label">菜品名称 <text class="req">*</text></view>
+    <input class="input" placeholder="如：红烧肉" value="{{form.name}}" bindinput="onNameInput" />
+  </view>
+
+  <!-- 分类 -->
+  <view class="block">
+    <view class="block-label">分类 <text class="req">*</text></view>
+    <picker mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+      <view class="picker">{{categories[categoryIndex]}}</view>
+    </picker>
+  </view>
+
+  <!-- 所需食材 -->
+  <view class="block">
+    <view class="block-label">所需食材</view>
+    <view class="line" wx:for="{{form.ingredients}}" wx:key="index">
+      <input class="input line-name" placeholder="食材名" value="{{item.name}}" data-type="ingredients" data-index="{{index}}" data-field="name" bindinput="onListItemInput" />
+      <input class="input line-amount" placeholder="用量" value="{{item.amount}}" data-type="ingredients" data-index="{{index}}" data-field="amount" bindinput="onListItemInput" />
+      <view class="line-del" data-type="ingredients" data-index="{{index}}" bindtap="onRemoveLine">✕</view>
+    </view>
+    <view class="add-line" data-type="ingredients" bindtap="onAddLine">+ 添加食材</view>
+  </view>
+
+  <!-- 所需调味料 -->
+  <view class="block">
+    <view class="block-label">所需调味料</view>
+    <view class="line" wx:for="{{form.seasonings}}" wx:key="index">
+      <input class="input line-name" placeholder="调料名" value="{{item.name}}" data-type="seasonings" data-index="{{index}}" data-field="name" bindinput="onListItemInput" />
+      <input class="input line-amount" placeholder="用量" value="{{item.amount}}" data-type="seasonings" data-index="{{index}}" data-field="amount" bindinput="onListItemInput" />
+      <view class="line-del" data-type="seasonings" data-index="{{index}}" bindtap="onRemoveLine">✕</view>
+    </view>
+    <view class="add-line" data-type="seasonings" bindtap="onAddLine">+ 添加调味料</view>
+  </view>
+
+  <!-- 制作过程 -->
+  <view class="block">
+    <view class="block-label">制作过程</view>
+    <view class="step-line" wx:for="{{form.steps}}" wx:key="index">
+      <view class="step-idx">{{index + 1}}</view>
+      <textarea class="input step-text" placeholder="描述这一步" value="{{item}}" data-index="{{index}}" bindinput="onStepInput" auto-height />
+      <view class="line-del" data-index="{{index}}" bindtap="onRemoveStep">✕</view>
+    </view>
+    <view class="add-line" bindtap="onAddStep">+ 添加步骤</view>
+  </view>
+
+  <!-- 保存 -->
+  <view class="save-btn {{saving ? 'saving' : ''}}" bindtap="onSave">{{saving ? '保存中…' : '保存'}}</view>
+
+</view>
+
+<!-- 非主人拦截 -->
+<view class="page deny" wx:else>
+  <view class="deny-icon">🔒</view>
+  <view class="deny-text">仅主人可添加菜品</view>
+</view>

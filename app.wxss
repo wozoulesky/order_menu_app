@@ -1,0 +1,30 @@
+/* app.wxss —— 全局样式 */
+
+/* 色板：以暖橙为主色，呼应「做饭/厨房」主题 */
+page {
+  --color-primary: #ff7a45;        /* 主色 橙 */
+  --color-primary-light: #fff3ec;  /* 主色浅底 */
+  --color-text: #333333;           /* 主文字 */
+  --color-text-sub: #888888;       /* 次要文字 */
+  --color-border: #ececec;         /* 分割线 */
+  --color-bg: #f5f5f5;             /* 页面背景 */
+
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* 通用：去除图片默认下方间隙 */
+image {
+  display: block;
+}
+
+/* 通用：单行省略 */
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "getDishes",
+  "version": "1.0.0",
+  "description": "读取菜品列表（含分类过滤、图片临时链接）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

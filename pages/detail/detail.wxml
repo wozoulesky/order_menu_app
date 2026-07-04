@@ -1,0 +1,59 @@
+<!--pages/detail/detail.wxml-->
+<view class="page">
+  <!-- 菜品图片 -->
+  <view class="dish-cover">
+    <image wx:if="{{dish.imageUrl}}" class="cover-img" src="{{dish.imageUrl}}" mode="aspectFill" />
+    <view wx:else class="cover-placeholder">🥘</view>
+  </view>
+
+  <!-- 菜品名称 + 加入按钮 -->
+  <view class="dish-head">
+    <view class="dish-title">{{dish.name}}</view>
+    <view
+      class="add-btn {{added ? 'added' : ''}}"
+      bindtap="onAddTap"
+    >{{added ? '已加入菜单' : '加入菜单'}}</view>
+  </view>
+
+  <!-- 所需食材 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="dot dot-green"></text>所需食材
+    </view>
+    <view class="list">
+      <view class="list-item" wx:for="{{dish.ingredients}}" wx:key="name">
+        <text class="item-name">{{item.name}}</text>
+        <text class="item-amount">{{item.amount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 所需调味料 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="dot dot-orange"></text>所需调味料
+    </view>
+    <view class="list">
+      <view class="list-item" wx:for="{{dish.seasonings}}" wx:key="name">
+        <text class="item-name">{{item.name}}</text>
+        <text class="item-amount">{{item.amount}}</text>
+      </view>
+      <view wx:if="{{dish.seasonings.length === 0}}" class="empty-inline">本菜无需调味料</view>
+    </view>
+  </view>
+
+  <!-- 制作过程 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="dot dot-blue"></text>制作过程
+    </view>
+    <view class="steps">
+      <view class="step" wx:for="{{dish.steps}}" wx:key="index">
+        <view class="step-num">{{index + 1}}</view>
+        <view class="step-text">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer-tip">—— 就这些，开做吧 ——</view>
+</view>
