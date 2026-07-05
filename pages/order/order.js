@@ -18,11 +18,16 @@ Page({
   },
 
   onShow() {
+    // 登录态校验：未登录跳登录页（防止绕过首页直接进订单页）
+    if (!login.isLoggedIn()) {
+      wx.redirectTo({ url: '/pages/login/login' })
+      return
+    }
     this.setData({
       userInfo: login.getUserInfo() || { nickName: '', avatarUrl: '' },
       menu: cart.getMenu()
     })
-    // 登录前置后必已登录，直接拉订单
+    // 拉取订单
     this.loadOrders()
   },
 

@@ -29,10 +29,10 @@ order_menu_app/
 │   ├── cart.js                       「本次菜单」管理
 │   └── master.js                     主人权限判断
 ├── pages/
-│   ├── login/   登录页（启动页，所有人先登录再进首页）
-│   ├── index/    首页（分类浏览 + 加入菜单，读云数据库）
-│   ├── detail/   详情页（菜谱 + 加入菜单 + 主人编辑入口）
-│   ├── order/    订单页（提交订单 + 查看历史 + 主人加菜入口 + 退出登录）
+│   ├── index/    首页（启动页，分类浏览 + 加入菜单，读云数据库，无需登录）
+│   ├── detail/   详情页（菜谱 + 加入菜单 + 主人编辑入口，无需登录）
+│   ├── order/    订单页（提交订单 + 查看历史 + 主人加菜入口 + 退出登录，需登录）
+│   ├── login/   登录页（从订单页入口进入，微信一键登录）
 │   └── admin/edit/   添加/编辑菜品页（仅主人可进，有 id 参数=编辑模式）
 └── cloudfunctions/
     ├── submitOrder/    提交订单
@@ -76,13 +76,16 @@ order_menu_app/
 - 原因：主人要随时加菜/改菜，不重新发版。本地文件做不到这点。
 - 详情页用 `app.globalData.dishesCache` 缓存（首页拉取后存），避免重复请求。
 
-### 4.2 登录前置
+### 4.2 按需登录（审核合规）
 
-- 登录页 `pages/login` 是启动页（app.json pages 首位），所有人进小程序先填昵称（+可选头像）。
-- 流程：填昵称 → 保存到 login 工具 → 调 getOrders 拿 openid+isMaster 存 master 工具 → reLaunch 首页。
-- 登录态缓存（login.getUserInfo().nickName 非空=已登录），登录页 onLoad 检测到已登录直接跳首页，不重复填。
-- 退出登录在订单页，调 `login.logout()`（清身份+清主人信息+reLaunch 回登录页）。
-- 旧身份填写栏已从订单页删除（登录前置后所有人已登录）。
+- **首页是启动页**（app.json pages 首位），用户进小程序直接浏览，不强制登录。
+  - 原因：微信审核要求，不能一进小程序就要求授权登录，必须先让用户体验功能。
+- 登录触发时机：用户点「我的订单」时，未登录则跳登录页。
+- 登录页 `pages/login` 用微信一键登录（chooseAvatar 取头像 + nickname 输入框带出昵称）。
+- 流程：填昵称 → 保存到 login 工具 → 调 getOrders 拿 openid+isMaster 存 master 工具 → 跳订单页。
+- 登录态缓存（login.getUserInfo().nickName 非空=已登录），下次进订单页自动通过。
+- 退出登录在订单页，调 `login.logout()`（清身份+清主人信息+reLaunch 回首页，让用户能继续浏览）。
+- 订单页 onShow 二次校验登录态，未登录 redirectTo 登录页（防绕过）。
 
 ### 4.3 登录用「头像昵称填写能力」，不用 wx.getUserProfile
 

@@ -1,5 +1,6 @@
 // pages/index/index.js
 const cart = require('../../utils/cart.js')
+const login = require('../../utils/login.js')
 const app = getApp()
 
 const DEFAULT_CATEGORIES = ['荤菜', '素菜', '汤品', '主食', '饮品']
@@ -98,8 +99,12 @@ Page({
     this.setData({ menuCount: cart.getCount() })
   },
 
-  // 进入我的订单页
+  // 进入我的订单页（未登录则先跳登录页）
   onCartTap() {
+    if (!login.isLoggedIn()) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return
+    }
     wx.navigateTo({ url: '/pages/order/order' })
   }
 })

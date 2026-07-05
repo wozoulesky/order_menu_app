@@ -49,7 +49,7 @@ function clearUserInfo() {
   } catch (e) {}
 }
 
-// 退出登录：清身份 + 清主人信息，跳回登录页
+// 退出登录：清身份 + 清主人信息，回首页（让用户能继续浏览，符合审核要求）
 function logout() {
   clearUserInfo()
   try {
@@ -59,7 +59,7 @@ function logout() {
   if (app && app.globalData) {
     app.globalData.userInfo = null
   }
-  wx.reLaunch({ url: '/pages/login/login' })
+  wx.reLaunch({ url: '/pages/index/index' })
 }
 
 module.exports = {

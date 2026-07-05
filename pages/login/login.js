@@ -10,9 +10,9 @@ Page({
   },
 
   onLoad() {
-    // 已登录则直接跳首页，不显示登录表单
+    // 已登录则直接跳订单页（登录是从订单页入口进来的）
     if (login.isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/index/index' })
+      wx.redirectTo({ url: '/pages/order/order' })
     }
   },
 
@@ -85,6 +85,7 @@ Page({
   },
 
   enterHome() {
-    wx.reLaunch({ url: '/pages/index/index' })
+    // 登录成功，跳订单页（用户是从"我的订单"入口进来登录的）
+    wx.redirectTo({ url: '/pages/order/order' })
   }
 })
