@@ -109,3 +109,18 @@
   color: var(--color-text-sub);
   padding: 12rpx 0;
 }
+
+/* 跳过登录（审核要求：可取消登录的出口） */
+.skip-btn {
+  margin-top: 40rpx;
+  font-size: 26rpx;
+  color: var(--color-text-sub);
+  padding: 16rpx 0;
+}
+
+/* 头像检测中提示 */
+.checking-tip {
+  font-size: 26rpx;
+  color: var(--color-text-sub);
+  margin-bottom: 24rpx;
+}

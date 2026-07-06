@@ -143,6 +143,14 @@ Page({
     wx.navigateTo({ url: '/pages/admin/edit' })
   },
 
+  // 转发给朋友
+  onShareAppMessage() {
+    return {
+      title: '做饭这件小事 · 来点餐吧',
+      path: '/pages/index/index'
+    }
+  },
+
   // 时间格式化：兼容云数据库 serverDate 返回的 Date 对象 / 时间戳
   formatTime(t) {
     if (!t) return ''

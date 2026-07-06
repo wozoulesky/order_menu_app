@@ -4,9 +4,11 @@ const master = require('../../utils/master.js')
 
 Page({
   data: {
-    tempAvatar: '',
+    tempAvatar: '',        // 本地预览路径
+    avatarFileID: '',      // 上传到云存储后的 fileID（已过安全检测）
     tempNick: '',
-    entering: false
+    entering: false,
+    checkingAvatar: false  // 头像检测中
   },
 
   onLoad() {
@@ -16,14 +18,11 @@ Page({
     }
   },
 
-  // 微信一键登录：chooseAvatar 回调，拿到微信头像
-  // 注意：开发者工具上点取消会触发 fail 日志，真机正常，这里只看 avatarUrl 是否有值
+  // 微信一键登录：chooseAvatar 回调，拿到微信头像临时路径
   onChooseWxAvatar(e) {
     if (e.detail && e.detail.avatarUrl) {
-      this.setData({ tempAvatar: e.detail.avatarUrl })
-      // 昵称留给用户在输入框点一下用「使用微信昵称」带出，或手动填
+      this.uploadAndCheck(e.detail.avatarUrl)
     }
-    // 取消时 avatarUrl 为空，不报错
   },
 
   // 相册选图（次要入口）
@@ -33,9 +32,61 @@ Page({
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: res => {
-        this.setData({ tempAvatar: res.tempFiles[0].tempFilePath })
+        this.uploadAndCheck(res.tempFiles[0].tempFilePath)
       },
       fail: () => {}
+    })
+  },
+
+  // 上传头像到云存储 + 内容安全检测
+  uploadAndCheck(filePath) {
+    this.setData({ checkingAvatar: true })
+    const cloudPath = `avatars/${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`
+    wx.cloud.uploadFile({
+      cloudPath,
+      filePath,
+      success: upRes => {
+        const fileID = upRes.fileID
+        // 调云函数做内容安全检测
+        wx.cloud.callFunction({
+          name: 'checkImage',
+          data: { fileID },
+          success: checkRes => {
+            const r = checkRes.result || {}
+            if (r.safe) {
+              // 安全，采用
+              this.setData({
+                tempAvatar: filePath,
+                avatarFileID: fileID,
+                checkingAvatar: false
+              })
+            } else {
+              // 违规，拒绝并删除已上传的图
+              wx.cloud.deleteFile({ fileList: [fileID] })
+              this.setData({ checkingAvatar: false })
+              wx.showModal({
+                title: '头像不合规',
+                content: r.msg || '图片含违规内容，请更换',
+                showCancel: false
+              })
+            }
+          },
+          fail: err => {
+            console.warn('检测服务异常，已放行', err)
+            // 检测服务异常时放行（与云函数保守策略一致）
+            this.setData({
+              tempAvatar: filePath,
+              avatarFileID: fileID,
+              checkingAvatar: false
+            })
+          }
+        })
+      },
+      fail: err => {
+        console.error('头像上传失败', err)
+        this.setData({ checkingAvatar: false })
+        wx.showToast({ title: '头像上传失败', icon: 'none' })
+      }
     })
   },
 
@@ -54,14 +105,14 @@ Page({
 
     this.setData({ entering: true })
 
-    // 1. 保存身份信息
+    // 保存身份信息（头像用云存储 fileID，可跨设备访问）
     const info = {
       nickName: nick,
-      avatarUrl: this.data.tempAvatar || ''
+      avatarUrl: this.data.avatarFileID || ''  // 用 fileID 而非临时路径
     }
     login.saveUserInfo(info)
 
-    // 2. 调云函数拿 openid + 主人身份
+    // 调云函数拿 openid + 主人身份
     wx.cloud.callFunction({
       name: 'getOrders',
       success: res => {
@@ -75,7 +126,7 @@ Page({
         this.enterHome()
       },
       fail: err => {
-        console.warn('获取身份失败，但仍进入首页', err)
+        console.warn('获取身份失败，但仍进入', err)
         this.enterHome()
       },
       complete: () => {
@@ -84,8 +135,12 @@ Page({
     })
   },
 
+  // 跳过登录，先逛逛（审核要求：提供取消/拒绝登录的出口）
+  onSkip() {
+    wx.reLaunch({ url: '/pages/index/index' })
+  },
+
   enterHome() {
-    // 登录成功，跳订单页（用户是从"我的订单"入口进来登录的）
     wx.redirectTo({ url: '/pages/order/order' })
   }
 })

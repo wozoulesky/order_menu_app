@@ -5,12 +5,15 @@
   <view class="subtitle">记录每一道家常菜的做法</view>
 
   <view class="form">
-    <!-- 头像预览（选完后显示） -->
+    <!-- 头像预览（选完且通过检测后显示） -->
     <view class="avatar-preview" wx:if="{{tempAvatar}}">
       <image class="avatar-preview-img" src="{{tempAvatar}}" mode="aspectFill" />
     </view>
 
-    <!-- 昵称预览（选完后显示，可改） -->
+    <!-- 检测中提示 -->
+    <view wx:if="{{checkingAvatar}}" class="checking-tip">正在检测头像内容…</view>
+
+    <!-- 昵称预览（选完头像后显示，可改） -->
     <input
       wx:if="{{tempAvatar}}"
       class="nickname-input"
@@ -21,9 +24,9 @@
       bindblur="onNickInput"
     />
 
-    <!-- 微信一键登录按钮（未选头像时显示） -->
+    <!-- 微信一键登录按钮（未选头像且未在检测时显示） -->
     <button
-      wx:if="{{!tempAvatar}}"
+      wx:if="{{!tempAvatar && !checkingAvatar}}"
       class="wx-login-btn"
       open-type="chooseAvatar"
       bindchooseavatar="onChooseWxAvatar"
@@ -40,8 +43,13 @@
     >{{entering ? '进入中…' : '进入小程序'}}</view>
 
     <!-- 从相册选（次要入口） -->
-    <view wx:if="{{!tempAvatar}}" class="album-entry" bindtap="onChooseFromAlbum">
+    <view wx:if="{{!tempAvatar && !checkingAvatar}}" class="album-entry" bindtap="onChooseFromAlbum">
       用相册图片代替
+    </view>
+
+    <!-- 跳过登录（审核要求：可取消/拒绝登录） -->
+    <view wx:if="{{!tempAvatar && !checkingAvatar}}" class="skip-btn" bindtap="onSkip">
+      跳过，先逛逛
     </view>
   </view>
 </view>

@@ -90,5 +90,14 @@ Page({
     wx.navigateTo({
       url: '/pages/admin/edit?id=' + this.data.dishId
     })
+  },
+
+  // 转发给朋友（带菜品 id，点开直达这道菜）
+  onShareAppMessage() {
+    const dish = this.data.dish
+    return {
+      title: dish.name ? `做饭这件小事 · ${dish.name}` : '做饭这件小事',
+      path: '/pages/detail/detail?id=' + this.data.dishId
+    }
   }
 })

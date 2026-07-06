@@ -106,5 +106,20 @@ Page({
       return
     }
     wx.navigateTo({ url: '/pages/order/order' })
+  },
+
+  // 转发给朋友
+  onShareAppMessage() {
+    return {
+      title: '做饭这件小事 · 来看看今晚做什么菜',
+      path: '/pages/index/index'
+    }
+  },
+
+  // 分享到朋友圈
+  onShareTimeline() {
+    return {
+      title: '做饭这件小事 · 记录每一道家常菜的做法'
+    }
   }
 })

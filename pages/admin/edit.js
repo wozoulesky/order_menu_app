@@ -92,17 +92,42 @@ Page({
   },
 
   uploadImage(filePath) {
-    wx.showLoading({ title: '上传图片…', mask: true })
+    wx.showLoading({ title: '上传检测中…', mask: true })
     // 云存储路径：dishes/时间戳-随机数.后缀
     const ext = filePath.substring(filePath.lastIndexOf('.') + 1) || 'jpg'
     const cloudPath = `dishes/${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`
     wx.cloud.uploadFile({
       cloudPath,
       filePath,
-      success: res => {
-        this.setData({ imageFileID: res.fileID })
-        wx.hideLoading()
-        wx.showToast({ title: '图片上传成功', icon: 'success' })
+      success: upRes => {
+        const fileID = upRes.fileID
+        // 内容安全检测（UGC 合规）
+        wx.cloud.callFunction({
+          name: 'checkImage',
+          data: { fileID },
+          success: checkRes => {
+            wx.hideLoading()
+            const r = checkRes.result || {}
+            if (r.safe) {
+              this.setData({ imageFileID: fileID, imageUrl: filePath })
+              wx.showToast({ title: '图片已上传', icon: 'success' })
+            } else {
+              // 不合规，删除已上传的图
+              wx.cloud.deleteFile({ fileList: [fileID] })
+              wx.showModal({
+                title: '图片不合规',
+                content: r.msg || '图片含违规内容，请更换',
+                showCancel: false
+              })
+            }
+          },
+          fail: () => {
+            // 检测服务异常时放行（与登录页策略一致）
+            wx.hideLoading()
+            this.setData({ imageFileID: fileID, imageUrl: filePath })
+            wx.showToast({ title: '图片已上传', icon: 'success' })
+          }
+        })
       },
       fail: err => {
         wx.hideLoading()
